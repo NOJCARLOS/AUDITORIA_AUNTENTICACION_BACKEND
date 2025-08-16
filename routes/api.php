@@ -7,4 +7,4 @@ use App\Http\Controllers\Api\VehicleController;
 Route::get('/ping', fn() => response()->json(['pong' => true]));
 Route::get('/vehicles', [VehicleController::class, 'index']);   // Listar
 Route::post('/vehicles', [VehicleController::class, 'store']);  // Insertar JSON
-Route::get('/vehicles/{vehiculo}', [VehicleController::class, 'show']); // Ver detalle
+Route::get('/vehicles/{vehicle}', [VehicleController::class, 'show']); // Ver detalle

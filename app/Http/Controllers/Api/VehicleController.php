@@ -22,7 +22,7 @@ class VehicleController extends Controller
         return $q->latest()->paginate($request->integer('per_page', 15));
     }
 
-    // Insertar uno desde JSON
+    // Insertar un vehiculo enviando un json
     public function store(VehicleStoreRequest $request) {
         $vehicle = DB::transaction(fn() => Vehicle::create($request->validated()));
 
