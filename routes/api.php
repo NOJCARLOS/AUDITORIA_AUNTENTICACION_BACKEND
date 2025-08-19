@@ -1,58 +1,87 @@
 <?php
 
-use Illuminate\Support\Facades\Route;          // Se importa la clase Route para definir rutas de la API
-use App\Http\Controllers\Api\VehicleController; // Se importa el controlador que gestionará las rutas de vehículos
-use App\Http\Middleware\PlainAuth;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Models\User;
+use App\Http\Controllers\Api\VehicleController;
+use App\Http\Middleware\PlainAuth;
 
-// ============================
-// API de Vehículos
-// ============================
+/*
+|--------------------------------------------------------------------------
+| Rutas API (Laravel 11)
+|--------------------------------------------------------------------------
+| - /ping                → público (salud de API)
+| - /plain/register      → registro (guarda password en TEXTO PLANO)
+| - /plain/login         → login (acepta password en TEXTO PLANO o HASH)
+| - /plain/me            → protegido por PlainAuth
+| - /vehicles (CRUD R/O) → protegidas por PlainAuth
+*/
 
-// Login “texto plano” (solo valida y responde; sin sesión/token)
+/* ---------- Público ---------- */
+
+// Salud de API
+Route::get('/ping', fn () => response()->json(['pong' => true]));
+
+// Registro (guarda contraseña en TEXTO PLANO)
+Route::post('/plain/register', function (Request $request) {
+    $data = $request->validate([
+        'name'     => ['required', 'string', 'max:100'],
+        'email'    => ['required', 'email', 'max:150', 'unique:users,email'],
+        'password' => ['required', 'string', 'min:4'],
+    ]);
+
+    $user = User::create([
+        'name'     => $data['name'],
+        'email'    => $data['email'],
+        'password' => $data['password'], // ⚠️ TEXTO PLANO a petición del usuario
+    ]);
+
+    return response()->json([
+        'message' => 'OK',
+        'user'    => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email],
+    ], 201);
+});
+
+// Login (acepta texto plano o hash en BD)
 Route::post('/plain/login', function (Request $request) {
     $credentials = $request->validate([
-        'email' => ['required','email'],
+        'email'    => ['required', 'email'],
         'password' => ['required'],
     ]);
 
     $user = User::where('email', $credentials['email'])->first();
-    if (!$user || !Hash::check($credentials['password'], $credentials['password'])) {
-        // ↑↑ si usas hash real, cambia la 2ª comparación por: !Hash::check($credentials['password'], $user->password)
+    if (!$user) {
+        return response()->json(['message' => 'Credenciales inválidas'], 401);
+    }
+
+    $stored   = (string) ($user->password ?? '');
+    $isHashed = Str::startsWith($stored, ['$2y$', '$argon2id$', '$argon2i$']);
+
+    $valid = $isHashed
+        ? Hash::check($credentials['password'], $stored)      // BD: hash
+        : hash_equals($stored, $credentials['password']);     // BD: texto plano
+
+    if (!$valid) {
         return response()->json(['message' => 'Credenciales inválidas'], 401);
     }
 
     return response()->json([
         'message' => 'OK',
-        'user' => ['id'=>$user->id,'name'=>$user->name,'email'=>$user->email],
+        'user'    => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email],
     ]);
 });
 
-// Ver usuario enviando X-Email / X-Password (cabeceras) o email/password en body
+/* ---------- Protegido por PlainAuth ---------- */
+
+// “Quién soy” (requiere X-Email / X-Password)
 Route::get('/plain/me', fn (Request $r) => response()->json($r->user()))
-    ->middleware(PlainAuth::class); // usa la clase
+    ->middleware(PlainAuth::class);
 
+// Vehículos (listar, crear, ver detalle) protegidos
 Route::middleware(PlainAuth::class)->group(function () {
-
-    // Ruta de prueba (ping → pong)
-    // Sirve para verificar que la API está en funcionamiento.
-    // Devuelve {"pong": true} con HTTP 200.
-    Route::get('/ping', fn() => response()->json(['pong' => true]));
-
-    // Ruta GET /vehicles
-    // Llama al método index() del VehicleController.
-    // Permite listar los vehículos con posibilidad de filtros (marca, estado, año) y paginación.
-    Route::get('/vehicles', [VehicleController::class, 'index']);
-
-    // Ruta POST /vehicles
-    // Llama al método store() del VehicleController.
-    // Permite insertar un nuevo vehículo enviando los datos en formato JSON.
-    Route::post('/vehicles', [VehicleController::class, 'store']);
-
-    // Ruta GET /vehicles/{vehicle}
-    // Llama al método show() del VehicleController.
-    // Devuelve el detalle de un vehículo específico identificado por su ID.
-    Route::get('/vehicles/{vehicle}', [VehicleController::class, 'show']);
-
+    Route::get('/vehicles', [VehicleController::class, 'index']);   // Listar (con filtros y paginación)
+    Route::post('/vehicles', [VehicleController::class, 'store']);  // Crear JSON
+    Route::get('/vehicles/{vehicle}', [VehicleController::class, 'show']); // Detalle
 });
