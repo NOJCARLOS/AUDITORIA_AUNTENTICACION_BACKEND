@@ -24,14 +24,20 @@ class PlainAuth
             return response()->json(['message' => 'Credenciales inválidas'], 401);
         }
 
-        $stored = (string) ($user->password ?? '');
-
-        // Soporta hash o texto plano
+        $stored   = (string) ($user->password ?? '');
         $isHashed = Str::startsWith($stored, ['$2y$', '$argon2id$', '$argon2i$']);
-        $valid = $isHashed ? Hash::check($password, $stored) : hash_equals($stored, $password);
+
+        $valid = $isHashed ? Hash::check($password, $stored)
+                           : hash_equals($stored, $password);
 
         if (!$valid) {
             return response()->json(['message' => 'Credenciales inválidas'], 401);
+        }
+
+        // Re-hashear al vuelo si era texto plano o si el hash quedó viejo
+        if (!$isHashed || Hash::needsRehash($stored)) {
+            $user->password = $password; // el cast 'hashed' aplicará Hash::make()
+            $user->save();
         }
 
         $request->setUserResolver(fn () => $user);
