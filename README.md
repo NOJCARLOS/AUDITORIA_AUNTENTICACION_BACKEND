@@ -1,61 +1,127 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<p align="center"> <a href="https://laravel.com" target="_blank"> <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Logo Laravel"> </a> </p> <p align="center"> <a href="https://github.com/tuusuario/tuproyecto/actions"><img src="https://github.com/tuusuario/tuproyecto/workflows/tests/badge.svg" alt="Estado del build"></a> <a href="https://packagist.org/packages/laravel/laravel"><img src="https://img.shields.io/packagist/dt/laravel/laravel" alt="Descargas totales"></a> <a href="https://packagist.org/packages/laravel/laravel"><img src="https://img.shields.io/packagist/v/laravel/laravel" alt="Última versión estable"></a> <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/packagist/l/laravel/laravel" alt="Licencia"></a> </p>
+Acerca del Proyecto
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Este es un API REST desarrollado con Laravel 10, que incluye:
 
-## About Laravel
+Autenticación mediante Laravel Sanctum (tokens API)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Integración de inicio de sesión con Google OAuth2 (Laravel Socialite)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Gestión de usuarios (registro, inicio de sesión, cierre de sesión)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Endpoints para administración de vehículos
 
-## Learning Laravel
+Hashing seguro de contraseñas (bcrypt/argon2id)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Está diseñado como base sólida para proyectos que necesiten login local y autenticación social.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Características
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Autenticación con Laravel Sanctum
 
-## Laravel Sponsors
+Login con Google OAuth2
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Endpoints REST para Vehículos
 
-### Premium Partners
+Hashing seguro de contraseñas
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Migrations y ORM Eloquent
 
-## Contributing
+Endpoints del API
+Públicos
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+GET /api/ping – Verifica el estado del API
 
-## Code of Conduct
+POST /api/auth/register – Registro de usuario
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+POST /api/auth/login – Inicio de sesión local (email/contraseña)
 
-## Security Vulnerabilities
+GET /api/auth/google/redirect – Redirige a Google para autenticación
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+GET /api/auth/google/callback – Procesa el login de Google
 
-## License
+Protegidos (requieren Bearer <token> generado por Sanctum)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+GET /api/auth/me – Devuelve datos del usuario autenticado
+
+POST /api/auth/logout – Revoca el token actual
+
+GET /api/vehicles – Lista todos los vehículos
+
+POST /api/vehicles – Crea un nuevo vehículo
+
+GET /api/vehicles/{vehicle} – Muestra un vehículo específico
+
+Instalación
+
+Clonar el repositorio:
+
+git clone https://github.com/tuusuario/tuproyecto.git
+cd tuproyecto
+
+
+Instalar dependencias:
+
+composer install
+
+
+Crear archivo .env y configurarlo:
+
+cp .env.example .env
+php artisan key:generate
+
+
+Ejecutar migraciones:
+
+php artisan migrate
+
+
+Iniciar servidor:
+
+php artisan serve
+
+Pruebas con cURL
+
+Registro:
+
+curl -X POST http://localhost:8000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Juan","email":"juan@example.com","password":"1234"}'
+
+
+Inicio de sesión:
+
+curl -X POST http://localhost:8000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"juan@example.com","password":"1234"}'
+
+
+Obtener vehículos (requiere token):
+
+curl -X GET http://localhost:8000/api/vehicles \
+  -H "Authorization: Bearer <tu_token_aquí>"
+
+Aprender Laravel
+
+Documentación oficial de Laravel
+
+Laravel Bootcamp
+
+Laracasts
+ – Miles de tutoriales en video sobre Laravel, PHP y más.
+
+Contribuir
+
+¡Las contribuciones son bienvenidas!
+Por favor, revisa la guía de contribución
+ antes de enviar un pull request.
+
+Vulnerabilidades de Seguridad
+
+Si descubres una vulnerabilidad de seguridad, por favor repórtala mediante GitHub Issues
+ o contacta directamente a los mantenedores del proyecto.
+
+Licencia
+
+Este proyecto es software de código abierto licenciado bajo la Licencia MIT
+.
